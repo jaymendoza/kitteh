@@ -16,12 +16,33 @@ class Kitteh
   def self.column_headers
     Bigcommerce::Category.all.first.keys.map {|key| key.to_s }
   end
-end
 
-CSV.open('testsub1.csv', 'a') {|csv| csv << Kitteh.column_headers }
+  def self.categories
+    # paginate here
+  end
 
-Bigcommerce::Category.all.each do |cat|
-  CSV.open('testsub1.csv', 'a') do |csv|
-    csv << cat.values
+  def self.write_csv
+    CSV.open('testsub1.csv', 'a') {|csv| csv << column_headers }
+
+    Bigcommerce::Category.all.each do |category|
+      CSV.open('testsub1.csv', 'a') do |csv|
+        csv << category.values
+      end
+    end
+  end
+
+  def self.read_csv
+    csv_data = {}
+    csv = CSV.read('testsub1.csv')
+    csv.shift
+
+    csv.each do |row|
+      csv_data[row[0]] = row
+    end
+
+    csv_data
   end
 end
+
+#Kitteh.write_csv
+puts Kitteh.read_csv

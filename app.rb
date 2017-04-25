@@ -42,7 +42,39 @@ class Kitteh
 
     csv_data
   end
+
+  def self.update_categories(category_data)
+    category_data.each do |id, data|
+      category_hash = transform_category_data(data)
+
+      begin
+        Bigcommerce::Category.update(id, category_hash)
+      rescue Bigcommerce::ResourceConflict => e
+          puts e.message
+          puts 'cat id: ' + id
+          puts category_hash
+      end
+    end
+  end
+
+  def self.transform_category_data(array)
+    {
+      parent_id: array[1],
+      name: array[2],
+      description: array[3],
+      sort_order: array[4],
+      page_title: array[5],
+      meta_keywords: array[6],
+      meta_description: array[7],
+      layout_file: array[8],
+      image_file: array[10],
+      is_visible: array[11] == 'true' ? true : false,
+      search_keywords: array[12],
+      url: array[13]
+    }
+  end
 end
 
 #Kitteh.write_csv
-puts Kitteh.read_csv
+d = Kitteh.read_csv
+Kitteh.update_categories(d)

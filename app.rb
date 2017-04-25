@@ -21,10 +21,7 @@ end
 CSV.open('testsub1.csv', 'a') {|csv| csv << Kitteh.column_headers }
 
 Bigcommerce::Category.all.each do |cat|
-  puts cat.name
-#  CSV.open('testsub1.csv', 'a') do |csv|
-#    csv << values
-#  end
-    
-
+  CSV.open('testsub1.csv', 'a') do |csv|
+    csv << cat.values
+  end
 end

@@ -10,6 +10,15 @@ Bigcommerce.configure do |config|
   config.url = 'https://jay.bigcommerce.support/api/v2'
   config.username = ENV['USERNAME']
   config.api_key = ENV['API_KEY']
+  config.ssl = { :verify => false }
+end
+
+module KittehCat
+  class App < Sinatra::Application
+    get '/' do
+      'asdfasdfdsf'
+    end
+  end
 end
 
 class Kitteh

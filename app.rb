@@ -18,6 +18,11 @@ module KittehCat
     get '/' do
       'asdfasdfdsf'
     end
+
+    get '/csv/get' do
+        erb :get_csv
+
+    end
   end
 end
 
@@ -85,5 +90,5 @@ class Kitteh
 end
 
 #Kitteh.write_csv
-d = Kitteh.read_csv
-Kitteh.update_categories(d)
+#d = Kitteh.read_csv
+#Kitteh.update_categories(d)

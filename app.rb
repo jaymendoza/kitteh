@@ -5,14 +5,6 @@ require 'csv'
 Bundler.require
 Dotenv.load
 
-Bigcommerce.configure do |config|
-  config.auth = 'legacy'
-  config.url = 'https://jay.bigcommerce.support/api/v2'
-  config.username = ENV['USERNAME']
-  config.api_key = ENV['API_KEY']
-  config.ssl = { :verify => false }
-end
-
 module KittehCat
   class App < Sinatra::Application
     get '/' do
@@ -20,13 +12,26 @@ module KittehCat
     end
 
     get '/csv/get' do
-        erb :get_csv
+      erb :get_csv
     end
 
     post '/csv/generate' do
-      params['url']
+      Utils.authenticate(params)
+      Kitteh.write_csv
     end
+  end
 
+  class Utils
+    def self.authenticate(params)
+      return false if params[:url].nil? || params[:username].nil? || params[:api_key].nil?
+      Bigcommerce.configure do |config|
+        config.auth = 'legacy'
+        config.url = params[:url]
+        config.username = params[:username]
+        config.api_key = params[:api_key]
+        config.ssl = { :verify => false }
+      end
+    end
   end
 end
 

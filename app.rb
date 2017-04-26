@@ -16,8 +16,11 @@ module KittehCat
     end
 
     post '/csv/generate' do
+      content_type 'application/csv'
+      attachment 'foo.csv'
+
       Utils.authenticate(params)
-      Kitteh.write_csv
+      Kitteh.generate_csv
     end
   end
 
@@ -44,11 +47,10 @@ class Kitteh
     # paginate here
   end
 
-  def self.write_csv
-    CSV.open('testsub1.csv', 'a') {|csv| csv << column_headers }
-
-    Bigcommerce::Category.all.each do |category|
-      CSV.open('testsub1.csv', 'a') do |csv|
+  def self.generate_csv
+    CSV.generate do |csv|
+      csv << column_headers
+      Bigcommerce::Category.all.each do |category|
         csv << category.values
       end
     end

@@ -8,16 +8,13 @@ Dotenv.load
 module KittehCat
   class App < Sinatra::Application
     get '/' do
-      'asdfasdfdsf'
-    end
-
-    get '/csv/get' do
-      erb :get_csv
+      erb :index
     end
 
     post '/csv/generate' do
       content_type 'application/csv'
       attachment 'foo.csv'
+      # generate file name with timestamp, e.g. categories-2017-04-26.csv
 
       Utils.authenticate(params)
       Kitteh.generate_csv

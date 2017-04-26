@@ -21,8 +21,12 @@ module KittehCat
 
     get '/csv/get' do
         erb :get_csv
-
     end
+
+    post '/csv/generate' do
+      params['url']
+    end
+
   end
 end
 

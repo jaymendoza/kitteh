@@ -38,13 +38,13 @@
         <div class="col-lg-6 col-sm-6 col-12">
             <h4>Update Categories</h4>
 
-            <form method="post" action="/csv/get">
+            <form method="post" action="/upload" enctype="multipart/form-data">
                 <label class="input-group-btn">
                     <span class="btn btn-primary">
-                        Browse&hellip; <input type="file" style="display: none;" multiple>
+                        Browse&hellip; <input type="file" name="file">
                     </span>
                 </label>
-                <input type="text" class="form-control" readonly>
+                <button type="submit" class="btn btn-primary">Upload</button>
             </form>
         </div>
 

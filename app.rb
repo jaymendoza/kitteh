@@ -19,6 +19,10 @@ module KittehCat
       Utils.authenticate(params)
       Kitteh.generate_csv
     end
+
+    post '/upload' do
+      puts params
+    end
   end
 
   class Utils

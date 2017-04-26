@@ -70,15 +70,15 @@ class Kitteh
     {
       parent_id: array[1],
       name: array[2],
-      description: array[3],
+      description: array[3] || '',
       sort_order: array[4],
-      page_title: array[5],
-      meta_keywords: array[6],
-      meta_description: array[7],
+      page_title: array[5] || '',
+      meta_keywords: array[6] || '',
+      meta_description: array[7] || '',
       layout_file: array[8],
-      image_file: array[10],
+      image_file: array[10] || '',
       is_visible: array[11] == 'true' ? true : false,
-      search_keywords: array[12],
+      search_keywords: array[12] || '',
       url: array[13]
     }
   end

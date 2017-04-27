@@ -17,7 +17,7 @@ module KittehCat
       ### TODO: generate file name with timestamp, e.g. categories-2017-04-26.csv
 
       Utils.authenticate(params)
-      Kitteh.generate_csv
+      KittehCSV.generate
     end
 
     post '/upload' do
@@ -32,7 +32,6 @@ module KittehCat
 
       Utils.authenticate(params)
       Kitteh.update_categories(csv_data)
-      ### TODO: need to auth before updating categories
       'Categories Updated'
     end
   end
@@ -51,16 +50,12 @@ module KittehCat
   end
 end
 
-class Kitteh
+class KittehCSV
   def self.column_headers
     Bigcommerce::Category.all.first.keys.map {|key| key.to_s }
   end
 
-  def self.categories
-    ### TODO: paginate here
-  end
-
-  def self.generate_csv
+  def self.generate
     CSV.generate do |csv|
       csv << column_headers
       Bigcommerce::Category.all.each do |category|
@@ -68,17 +63,11 @@ class Kitteh
       end
     end
   end
+end
 
-  def self.read_csv
-    csv_data = {}
-    csv = CSV.read('testsub1.csv')
-    csv.shift
-
-    csv.each do |row|
-      csv_data[row[0]] = row
-    end
-
-    csv_data
+class Kitteh
+  def self.categories
+    ### TODO: paginate here
   end
 
   def self.update_categories(category_data)

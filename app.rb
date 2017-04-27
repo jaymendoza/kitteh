@@ -63,16 +63,24 @@ class KittehCSV
   def self.generate
     CSV.generate do |csv|
       csv << column_headers
-      Bigcommerce::Category.all.each do |category|
-        csv << category.values
+      KittehCategories.list.each do |category|
+        csv << category
       end
     end
   end
 end
 
-class Kitteh
-  def self.categories
-    ### TODO: paginate here
+class KittehCategories
+  def self.list
+    number_of_pages = (Bigcommerce::Product.count[:count].to_f / 250).ceil
+    csv = []
+
+    for page in 1..number_of_pages
+      Bigcommerce::Category.all(page: page, limit: 250).each do |category|
+        csv << category.values
+      end
+    end
+    csv
   end
 
   def self.update_categories(category_data)

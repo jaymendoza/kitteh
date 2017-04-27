@@ -39,6 +39,20 @@
             <h4>Update Categories</h4>
 
             <form method="post" action="/upload" enctype="multipart/form-data">
+                <label for="url" class="col-2 col-form-label">URL</label>
+                <div class="col-10">
+                    <input class="form-control" type="text" value="" id="url" name="url">
+                </div>
+
+                <label for="username" class="col-2 col-form-label">Username</label>
+                <div class="col-10">
+                    <input class="form-control" type="text" value="" id="username" name="username">
+                </div>
+
+                <label for="api_key" class="col-2 col-form-label">API Key</label>
+                <div class="col-10">
+                    <input class="form-control" type="text" value="" id="api_key" name="api_key">
+                </div>
                 <label class="input-group-btn">
                     <span class="btn btn-primary">
                         Browse&hellip; <input type="file" name="file">

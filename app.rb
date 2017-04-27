@@ -14,14 +14,26 @@ module KittehCat
     post '/csv/generate' do
       content_type 'application/csv'
       attachment 'foo.csv'
-      # generate file name with timestamp, e.g. categories-2017-04-26.csv
+      ### TODO: generate file name with timestamp, e.g. categories-2017-04-26.csv
 
       Utils.authenticate(params)
       Kitteh.generate_csv
     end
 
     post '/upload' do
-      puts params
+      file = params[:file][:tempfile]
+      csv_data = {}
+      csv = CSV.parse(file)
+      csv.shift
+
+      csv.each do |row|
+        csv_data[row[0]] = row
+      end
+
+      Utils.authenticate(params)
+      Kitteh.update_categories(csv_data)
+      ### TODO: need to auth before updating categories
+      'Categories Updated'
     end
   end
 
@@ -45,7 +57,7 @@ class Kitteh
   end
 
   def self.categories
-    # paginate here
+    ### TODO: paginate here
   end
 
   def self.generate_csv
@@ -100,7 +112,3 @@ class Kitteh
     }
   end
 end
-
-#Kitteh.write_csv
-#d = Kitteh.read_csv
-#Kitteh.update_categories(d)

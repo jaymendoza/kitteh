@@ -25,7 +25,7 @@ module KittehCat
       Utils.authenticate(params)
 
       csv_data = KittehCSV.prepare(params)
-      Kitteh.update_categories(csv_data)
+      KittehCategories.update_categories(csv_data)
       'Categories Updated'
     end
   end
@@ -106,7 +106,7 @@ class KittehCategories
       page_title: array[5] || '',
       meta_keywords: array[6] || '',
       meta_description: array[7] || '',
-      layout_file: array[8],
+      layout_file: array[8] || '',
       image_file: array[10] || '',
       is_visible: array[11] == 'true' ? true : false,
       search_keywords: array[12] || '',

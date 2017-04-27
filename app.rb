@@ -12,25 +12,19 @@ module KittehCat
     end
 
     post '/csv/generate' do
+      Utils.authenticate(params)
+
       content_type 'application/csv'
       attachment 'foo.csv'
       ### TODO: generate file name with timestamp, e.g. categories-2017-04-26.csv
 
-      Utils.authenticate(params)
       KittehCSV.generate
     end
 
     post '/upload' do
-      file = params[:file][:tempfile]
-      csv_data = {}
-      csv = CSV.parse(file)
-      csv.shift
-
-      csv.each do |row|
-        csv_data[row[0]] = row
-      end
-
       Utils.authenticate(params)
+
+      csv_data = KittehCSV.prepare(params)
       Kitteh.update_categories(csv_data)
       'Categories Updated'
     end
@@ -53,6 +47,17 @@ end
 class KittehCSV
   def self.column_headers
     Bigcommerce::Category.all.first.keys.map {|key| key.to_s }
+  end
+
+  def self.prepare(params)
+    csv_data = {}
+    csv = CSV.parse(params[:file][:tempfile])
+    csv.shift
+
+    csv.each do |row|
+      csv_data[row[0]] = row
+    end
+    csv_data
   end
 
   def self.generate

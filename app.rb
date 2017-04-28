@@ -92,13 +92,13 @@ class KittehCategories
           Bigcommerce::Category.update(id, category_hash)
         end
       rescue Bigcommerce::ResourceConflict => e
-          puts e.message
-          puts 'cat id: ' + id
-          puts category_hash
+        puts e.message
+        puts 'cat id: ' + id
+        puts category_hash
       rescue Bigcommerce::NotFound => e
-          puts e.message
-          puts 'cat id: ' + id
-          puts category_hash
+        puts e.message
+        puts 'cat id: ' + id
+        puts category_hash
       end
     end
   end

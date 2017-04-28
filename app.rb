@@ -1,9 +1,7 @@
 require 'bundler'
-require 'dotenv'
 require 'csv'
 
 Bundler.require
-Dotenv.load
 
 module KittehCat
   class App < Sinatra::Application

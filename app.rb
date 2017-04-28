@@ -86,23 +86,30 @@ class KittehCategories
       category_hash = transform_category_data(data)
 
       begin
-        Bigcommerce::Category.update(id, category_hash)
+        if id.nil?
+          Bigcommerce::Category.create(category_hash)
+        else
+          Bigcommerce::Category.update(id, category_hash)
+        end
       rescue Bigcommerce::ResourceConflict => e
           puts e.message
           puts 'cat id: ' + id
           puts category_hash
-      rescue Exception => e
+      rescue Bigcommerce::NotFound => e
           puts e.message
+          puts 'cat id: ' + id
+          puts category_hash
       end
     end
   end
 
+  ### TODO: reconsider validation + CONSIDER deletion/creation
   def self.transform_category_data(array)
     {
       parent_id: array[1],
       name: array[2],
       description: array[3] || '',
-      sort_order: array[4],
+      sort_order: array[4] || 0,
       page_title: array[5] || '',
       meta_keywords: array[6] || '',
       meta_description: array[7] || '',

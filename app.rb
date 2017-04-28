@@ -11,10 +11,10 @@ module KittehCat
 
     post '/csv/generate' do
       Utils.authenticate(params)
+      filename = "categories-#{Time.now.strftime('%F')}-#{Time.now.to_i.to_s}.csv"
 
       content_type 'application/csv'
-      attachment 'foo.csv'
-      ### TODO: generate file name with timestamp, e.g. categories-2017-04-26.csv
+      attachment filename
 
       KittehCSV.generate
     end

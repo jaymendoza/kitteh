@@ -93,6 +93,8 @@ class KittehCategories
           puts e.message
           puts 'cat id: ' + id
           puts category_hash
+      rescue Exception => e
+          puts e.message
       end
     end
   end

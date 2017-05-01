@@ -19,7 +19,6 @@ module KittehCat
       builder = KittehCSVBuilder.new
       builder.get_categories
       builder.build_csv
-      #KittehCSV.generate
     end
 
     post '/upload' do
@@ -46,11 +45,6 @@ module KittehCat
 end
 
 class KittehCSV
-  # consider moving into KittehCategories + consolidating list and generate
-  def self.column_headers
-    Bigcommerce::Category.all.first.keys.map {|key| key.to_s }
-  end
-
   def self.prepare(params)
     csv_data = {}
     csv = CSV.parse(params[:file][:tempfile])
@@ -61,23 +55,7 @@ class KittehCSV
     end
     csv_data
   end
-
-  # generates
-  def self.generate
-    CSV.generate do |csv|
-      csv << column_headers
-      KittehCategories.list.each do |category|
-        csv << category
-      end
-    end
-  end
 end
-
-
-
-
-
-
 
 class KittehCSVBuilder
   attr_reader :categories
@@ -87,11 +65,9 @@ class KittehCSVBuilder
   end
 
   def build_csv
-    puts @categories
     CSV.generate do |csv|
       csv << column_headers
       @categories.each do |category|
-        puts category
         csv << category.values
       end
     end
@@ -112,27 +88,7 @@ class KittehCSVBuilder
   end
 end
 
-
-
-
-
-
-
-
-
 class KittehCategories
-  def self.list
-    number_of_pages = (Bigcommerce::Product.count[:count].to_f / 250).ceil
-    csv = []
-
-    for page in 1..number_of_pages
-      Bigcommerce::Category.all(page: page, limit: 250).each do |category|
-        csv << category.values
-      end
-    end
-    csv
-  end
-
   def self.update_categories(category_data)
     category_data.each do |id, data|
       category_hash = transform_category_data(data)
@@ -155,7 +111,7 @@ class KittehCategories
     end
   end
 
-  ### TODO: reconsider validation + CONSIDER deletion/creation
+  ### TODO: reconsider validation
   def self.transform_category_data(array)
     {
       parent_id: array[1],

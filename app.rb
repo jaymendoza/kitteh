@@ -24,8 +24,10 @@ module KittehCat
     post '/upload' do
       Utils.authenticate(params)
 
-      csv_data = KittehCSV.prepare(params)
-      KittehCategories.update_categories(csv_data)
+      updater = KittehCategoryUpdater.new
+      updater.read_csv(params)
+      updater.update
+
       'Categories Updated'
     end
   end
@@ -44,16 +46,40 @@ module KittehCat
   end
 end
 
-class KittehCSV
-  def self.prepare(params)
-    csv_data = {}
+class KittehCategoryUpdater
+  def initialize
+    @csv_data = {}
+  end
+
+  def read_csv(params)
     csv = CSV.parse(params[:file][:tempfile])
     csv.shift
-
     csv.each do |row|
-      csv_data[row[0]] = row
+      @csv_data[row[0]] = row
     end
-    csv_data
+  end
+
+  def update
+    @csv_data.each do |id, category|
+      transformer = KittehCategoryTransformer.new(category)
+      transformed_category = transformer.transform
+
+      begin
+        if id.nil?
+          Bigcommerce::Category.create(transformed_category)
+        else
+          Bigcommerce::Category.update(id, transformed_category)
+        end
+      rescue Bigcommerce::ResourceConflict => e
+        puts e.message
+        puts 'cat id: ' + id
+        puts category_hash
+      rescue Bigcommerce::NotFound => e
+        puts e.message
+        puts 'cat id: ' + id
+        puts category_hash
+      end
+    end
   end
 end
 
@@ -88,44 +114,25 @@ class KittehCSVBuilder
   end
 end
 
-class KittehCategories
-  def self.update_categories(category_data)
-    category_data.each do |id, data|
-      category_hash = transform_category_data(data)
-
-      begin
-        if id.nil?
-          Bigcommerce::Category.create(category_hash)
-        else
-          Bigcommerce::Category.update(id, category_hash)
-        end
-      rescue Bigcommerce::ResourceConflict => e
-        puts e.message
-        puts 'cat id: ' + id
-        puts category_hash
-      rescue Bigcommerce::NotFound => e
-        puts e.message
-        puts 'cat id: ' + id
-        puts category_hash
-      end
-    end
+class KittehCategoryTransformer
+  def initialize(category)
+    @category = category
   end
 
-  ### TODO: reconsider validation
-  def self.transform_category_data(array)
+  def transform
     {
-      parent_id: array[1],
-      name: array[2],
-      description: array[3] || '',
-      sort_order: array[4] || 0,
-      page_title: array[5] || '',
-      meta_keywords: array[6] || '',
-      meta_description: array[7] || '',
-      layout_file: array[8] || '',
-      image_file: array[10] || '',
-      is_visible: array[11] == 'true' ? true : false,
-      search_keywords: array[12] || '',
-      url: array[13]
+      parent_id: @category[1],
+      name: @category[2],
+      description: @category[3] || '',
+      sort_order: @category[4] || 0,
+      page_title: @category[5] || '',
+      meta_keywords: @category[6] || '',
+      meta_description: @category[7] || '',
+      layout_file: @category[8] || '',
+      image_file: @category[10] || '',
+      is_visible: @category[11] == 'true' ? true : false,
+      search_keywords: @category[12] || '',
+      url: @category[13]
     }
   end
 end

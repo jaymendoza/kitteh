@@ -26,7 +26,7 @@ module KittehCat
 
       updater = KittehCategoryUpdater.new
       updater.read_csv(params)
-      updater.update
+      updater.update(params)
 
       'Categories Updated'
     end
@@ -59,16 +59,18 @@ class KittehCategoryUpdater
     end
   end
 
-  def update
+  def update(params)
     @csv_data.each do |id, category|
       transformer = KittehCategoryTransformer.new(category)
       transformed_category = transformer.transform
 
       begin
         if id.nil?
-          Bigcommerce::Category.create(transformed_category)
+          #Bigcommerce::Category.create(transformed_category)
+          Resque.enqueue(KittehCategoryCreator, transformed_category, params)
         else
-          Bigcommerce::Category.update(id, transformed_category)
+          #Bigcommerce::Category.update(id, transformed_category)
+          Resque.enqueue(KittehCategoryUpdater, [id, transformed_category, params], [])
         end
       rescue Bigcommerce::ResourceConflict => e
         puts e.message
@@ -136,3 +138,22 @@ class KittehCategoryTransformer
     }
   end
 end
+
+class KittehCategoryCreator
+  @queue = 'create'
+
+  def self.perform(category, params)
+    KittehCat::Utils.authenticate(params)
+    Bigcommerce::Category.create(category)
+  end
+end
+
+class KittehCategoryUpdater
+  @queue = 'update'
+
+  def self.perform(args)
+    KittehCat::Utils.authenticate(args[2])
+    Bigcommerce::Category.update(args[0], args[1])
+  end
+end
+

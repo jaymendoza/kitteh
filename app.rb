@@ -16,7 +16,10 @@ module KittehCat
       content_type 'application/csv'
       attachment filename
 
-      KittehCSV.generate
+      builder = KittehCSVBuilder.new
+      builder.get_categories
+      builder.build_csv
+      #KittehCSV.generate
     end
 
     post '/upload' do
@@ -43,6 +46,7 @@ module KittehCat
 end
 
 class KittehCSV
+  # consider moving into KittehCategories + consolidating list and generate
   def self.column_headers
     Bigcommerce::Category.all.first.keys.map {|key| key.to_s }
   end
@@ -58,6 +62,7 @@ class KittehCSV
     csv_data
   end
 
+  # generates
   def self.generate
     CSV.generate do |csv|
       csv << column_headers
@@ -67,6 +72,53 @@ class KittehCSV
     end
   end
 end
+
+
+
+
+
+
+
+class KittehCSVBuilder
+  attr_reader :categories
+
+  def initialize
+    @categories = []
+  end
+
+  def build_csv
+    puts @categories
+    CSV.generate do |csv|
+      csv << column_headers
+      @categories.each do |category|
+        puts category
+        csv << category.values
+      end
+    end
+  end
+
+  def column_headers
+    @categories.first.keys.map {|key| key.to_s }
+  end
+
+  def get_categories
+    number_of_pages = (Bigcommerce::Category.count[:count].to_f / 250).ceil
+
+    for page in 1..number_of_pages
+      Bigcommerce::Category.all(page: page, limit: 250).each do |category|
+        @categories << category
+      end
+    end
+  end
+end
+
+
+
+
+
+
+
+
 
 class KittehCategories
   def self.list

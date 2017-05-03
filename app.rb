@@ -34,12 +34,12 @@ module KittehCat
 
   class Utils
     def self.authenticate(params)
-      return false if params[:url].nil? || params[:username].nil? || params[:api_key].nil?
+      return false if params['url'].nil? || params['username'].nil? || params['api_key'].nil?
       Bigcommerce.configure do |config|
         config.auth = 'legacy'
-        config.url = params[:url]
-        config.username = params[:username]
-        config.api_key = params[:api_key]
+        config.url = params['url']
+        config.username = params['username']
+        config.api_key = params['api_key']
         config.ssl = { :verify => false }
       end
     end
@@ -66,11 +66,9 @@ class KittehCategoryUpdater
 
       begin
         if id.nil?
-          #Bigcommerce::Category.create(transformed_category)
           Resque.enqueue(KittehCategoryCreator, transformed_category, params)
         else
-          #Bigcommerce::Category.update(id, transformed_category)
-          Resque.enqueue(KittehCategoryUpdater, [id, transformed_category, params], [])
+          Resque.enqueue(KittehCategoryUpdater, id, transformed_category, params)
         end
       rescue Bigcommerce::ResourceConflict => e
         puts e.message
@@ -151,9 +149,9 @@ end
 class KittehCategoryUpdater
   @queue = 'update'
 
-  def self.perform(args)
-    KittehCat::Utils.authenticate(args[2])
-    Bigcommerce::Category.update(args[0], args[1])
+  def self.perform(id, category, params)
+    KittehCat::Utils.authenticate(params)
+    Bigcommerce::Category.update(id, category)
   end
 end
 

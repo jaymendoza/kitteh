@@ -1,9 +1,1 @@
-worker_1: QUEUE=create bundle exec rake resque:work
-worker_2: QUEUE=create bundle exec rake resque:work
-worker_3: QUEUE=create bundle exec rake resque:work
-worker_4: QUEUE=update bundle exec rake resque:work
-worker_5: QUEUE=update bundle exec rake resque:work
-worker_6: QUEUE=update bundle exec rake resque:work
-worker_7: QUEUE=delete bundle exec rake resque:work
-worker_8: QUEUE=delete bundle exec rake resque:work
-worker_8: QUEUE=delete bundle exec rake resque:work
+resque: env TERM_CHILD=1 COUNT=2 QUEUE=update bundle exec rake resque:workers

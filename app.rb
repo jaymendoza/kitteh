@@ -48,27 +48,24 @@ end
 
 class KittehCategoryUpdater
   def initialize
-    @csv_data = {}
+    @csv = []
   end
 
   def read_csv(params)
-    csv = CSV.parse(params[:file][:tempfile])
-    csv.shift
-    csv.each do |row|
-      @csv_data[row[0]] = row
-    end
+    @csv = CSV.parse(params[:file][:tempfile], encoding: "ISO8859-1:utf-8", headers: true)
   end
 
   def update(params)
-    @csv_data.each do |id, category|
+    @csv.each do |category|
       transformer = KittehCategoryTransformer.new(category)
       transformed_category = transformer.transform
 
       begin
-        if id.nil?
-          Resque.enqueue(KittehCategoryCreator, transformed_category, params)
-        else
+        if transformed_category.key?(:id)
+          id = transformed_category[:id]
           Resque.enqueue(KittehCategoryUpdater, id, transformed_category, params)
+        else
+          Resque.enqueue(KittehCategoryCreator, transformed_category, params)
         end
       rescue Bigcommerce::ResourceConflict => e
         puts e.message
@@ -120,20 +117,93 @@ class KittehCategoryTransformer
   end
 
   def transform
-    {
-      parent_id: @category[1],
-      name: @category[2],
-      description: @category[3] || '',
-      sort_order: @category[4] || 0,
-      page_title: @category[5] || '',
-      meta_keywords: @category[6] || '',
-      meta_description: @category[7] || '',
-      layout_file: @category[8] || '',
-      image_file: @category[10] || '',
-      is_visible: @category[11] == 'true' ? true : false,
-      search_keywords: @category[12] || '',
-      url: @category[13]
+    cat = {
+      id: get_id(@category.fetch('id')),
+      parent_id: get_parent_id(@category.fetch('parent_id')),
+      name: get_name(@category.fetch('name')),
+      description: get_description(@category.fetch('description')),
+      sort_order: get_sort_order(@category.fetch('sort_order')),
+      page_title: get_page_title(@category.fetch('page_title')),
+      meta_keywords: get_meta_keywords(@category.fetch('meta_keywords')),
+      meta_description: get_meta_description(@category.fetch('meta_description')),
+      layout_file: get_layout_file(@category.fetch('layout_file')),
+      image_file: get_image_file(@category.fetch('image_file')),
+      is_visible: get_is_visible(@category.fetch('is_visible')),
+      search_keywords: get_search_keywords(@category.fetch('search_keywords')),
+      url: get_url(@category.fetch('url'))
     }
+
+    cat.delete_if {|k,v| v.nil? }
+  end
+
+  def get_id(id)
+    return nil if id.nil?
+    id
+  end
+
+  def get_parent_id(parent_id)
+    if parent_id.nil?
+      raise Exception, 'Category must have Parent ID'
+    else
+      parent_id
+    end
+  end
+
+  def get_name(name)
+    if name.nil?
+      raise Exception, 'Category must have a name'
+    else
+      name.force_encoding('UTF-8')
+    end
+  end
+
+  def get_description(description)
+    return '' if description.nil?
+    description.force_encoding('UTF-8')
+  end
+
+  def get_sort_order(sort_order)
+    return '0' if sort_order.nil?
+    sort_order
+  end
+
+  def get_page_title(page_title)
+    return '' if page_title.nil?
+    page_title.force_encoding('UTF-8')
+  end
+
+  def get_meta_keywords(meta_keywords)
+    return '' if meta_keywords.nil?
+    meta_keywords.force_encoding('UTF-8')
+  end
+
+  def get_meta_description(meta_description)
+    return '' if meta_description.nil?
+    meta_description.force_encoding('UTF-8')
+  end
+
+  def get_layout_file(layout_file)
+    return '' if layout_file.nil?
+    layout_file.force_encoding('UTF-8')
+  end
+
+  def get_image_file(image_file)
+    return '' if image_file.nil?
+    image_file.force_encoding('UTF-8')
+  end
+
+  def get_is_visible(is_visible)
+    is_visible === 'true' ? true : false
+  end
+
+  def get_search_keywords(search_keywords)
+    return '' if search_keywords.nil?
+    search_keywords.force_encoding('UTF-8')
+  end
+
+  def get_url(url)
+    return nil if url.nil?
+    url.force_encoding('UTF-8')
   end
 end
 
